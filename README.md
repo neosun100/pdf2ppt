@@ -25,6 +25,21 @@ Convert PDF Slides to PowerPoint Presentations with **Vector Graphics** (highest
 - 🔧 **MCP Support** - Model Context Protocol for AI integration
 - 🐳 **Docker Ready** - All-in-one Docker image available
 - 💎 **Glassmorphism Design** - Ultra modern frosted glass UI with neon effects
+- 🌍 **18 Languages** - Full internationalization support
+
+### 🌍 Supported Languages
+
+| Language | Code | Language | Code |
+|----------|------|----------|------|
+| English | en | Italiano | it |
+| 简体中文 | zh-CN | Русский | ru |
+| 繁體中文 | zh-TW | العربية | ar |
+| 日本語 | ja | हिन्दी | hi |
+| 한국어 | ko | ไทย | th |
+| Français | fr | Tiếng Việt | vi |
+| Deutsch | de | Nederlands | nl |
+| Español | es | Polski | pl |
+| Português | pt | Türkçe | tr |
 
 ## 🎯 Motivation
 

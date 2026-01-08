@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PDF2PPT - Convert PDF Slides to PowerPoint</title>
-    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/style.css?v=1.3.0">
 </head>
 <body>
     <div class="container">
@@ -14,13 +14,30 @@
                 <h1>📄 PDF2PPT</h1>
                 <p class="subtitle">Convert PDF Slides to PowerPoint with Vector Graphics</p>
             </div>
-            <div class="language-selector">
-                <select id="language" onchange="changeLanguage(this.value)">
-                    <option value="en">English</option>
-                    <option value="zh-CN">简体中文</option>
-                    <option value="zh-TW">繁體中文</option>
-                    <option value="ja">日本語</option>
-                </select>
+            <div class="header-actions">
+                <a href="/docs" target="_blank" class="api-docs-btn">📚 API Docs</a>
+                <div class="language-selector">
+                    <select id="language" onchange="changeLanguage(this.value)">
+                        <option value="en">English</option>
+                        <option value="zh-CN">简体中文</option>
+                        <option value="zh-TW">繁體中文</option>
+                        <option value="ja">日本語</option>
+                        <option value="ko">한국어</option>
+                        <option value="fr">Français</option>
+                        <option value="de">Deutsch</option>
+                        <option value="es">Español</option>
+                        <option value="pt">Português</option>
+                        <option value="it">Italiano</option>
+                        <option value="ru">Русский</option>
+                        <option value="ar">العربية</option>
+                        <option value="hi">हिन्दी</option>
+                        <option value="th">ไทย</option>
+                        <option value="vi">Tiếng Việt</option>
+                        <option value="nl">Nederlands</option>
+                        <option value="pl">Polski</option>
+                        <option value="tr">Türkçe</option>
+                    </select>
+                </div>
             </div>
         </header>
 
@@ -113,16 +130,17 @@
 
         <!-- Footer -->
         <footer class="footer">
-            <p>
-                <a href="/docs" target="_blank">API Documentation</a> | 
-                <a href="https://github.com/neosun100/pdf2ppt" target="_blank">GitHub</a> | 
+            <div class="footer-links">
+                <a href="https://github.com/neosun100/pdf2ppt" target="_blank">GitHub</a>
                 <a href="https://pypi.org/project/pdfslides2ppt/" target="_blank">PyPI</a>
-            </p>
-            <p class="version">v1.2.1</p>
+                <a href="https://hub.docker.com/r/neosun/pdf2ppt" target="_blank">Docker Hub</a>
+            </div>
+            <p class="version">v1.3.0</p>
+            <p class="copyright">Made with ❤️ by <a href="https://github.com/neosun100" target="_blank">neosun100</a></p>
         </footer>
     </div>
 
-    <script src="/static/js/i18n.js"></script>
-    <script src="/static/js/app.js"></script>
+    <script src="/static/js/i18n.js?v=1.3.0"></script>
+    <script src="/static/js/app.js?v=1.3.0"></script>
 </body>
 </html>

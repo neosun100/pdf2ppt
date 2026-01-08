@@ -2,6 +2,45 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0] - 2026-01-08
+
+### 🌍 Major Release: 18 Languages Support
+
+This release brings comprehensive internationalization with support for 18 languages.
+
+### Added
+- 🌍 **18 Languages Support**
+  - English, 简体中文, 繁體中文, 日本語
+  - 한국어 (Korean), Français (French), Deutsch (German), Español (Spanish)
+  - Português (Portuguese), Italiano (Italian), Русский (Russian), العربية (Arabic)
+  - हिन्दी (Hindi), ไทย (Thai), Tiếng Việt (Vietnamese), Nederlands (Dutch), Polski (Polish), Türkçe (Turkish)
+- 📚 API Docs button in header with glassmorphism style
+- ✍️ Author signature in footer: "Made with ❤️ by neosun100"
+- 🔗 Docker Hub link in footer
+
+### Changed
+- Improved header layout with API Docs button alongside language selector
+- Enhanced button styling with consistent glassmorphism effect
+- Added cache-busting version parameters to static assets
+
+### Fixed
+- CDN cache issues with static files
+
+## [1.2.2] - 2026-01-08
+
+### Added
+- 🌍 Extended i18n support to 18 languages
+  - English, 简体中文, 繁體中文, 日本語
+  - 한국어, Français, Deutsch, Español
+  - Português, Italiano, Русский, العربية
+  - हिन्दी, ไทย, Tiếng Việt, Nederlands, Polski, Türkçe
+- 📚 Prominent API Docs (Swagger) button in footer
+- 🔗 Docker Hub link in footer
+
+### Changed
+- Improved footer layout with button-style links
+- Enhanced visual hierarchy for documentation access
+
 ## [1.2.1] - 2026-01-08
 
 ### Added

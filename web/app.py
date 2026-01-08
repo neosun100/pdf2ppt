@@ -50,7 +50,7 @@ This API provides multiple ways to convert PDF presentations to PowerPoint forma
 - 🐳 [Docker Hub](https://hub.docker.com/r/neosun/pdf2ppt)
 - 📖 [MCP Guide](https://github.com/neosun100/pdf2ppt/blob/main/MCP_GUIDE.md)
     """,
-    version="1.2.1",
+    version="1.3.0",
     contact={
         "name": "Teddy van Jerry",
         "url": "https://github.com/neosun100/pdf2ppt",
@@ -99,7 +99,7 @@ class ConversionOptions(BaseModel):
 class HealthResponse(BaseModel):
     """Health check response"""
     status: str = Field(..., description="Service status", example="healthy")
-    version: str = Field(..., description="API version", example="1.2.1")
+    version: str = Field(..., description="API version", example="1.3.0")
 
 
 class ConversionProgress(BaseModel):
@@ -151,7 +151,7 @@ async def health():
     - Load balancer health checks
     - Deployment verification
     """
-    return {"status": "healthy", "version": "1.2.1"}
+    return {"status": "healthy", "version": "1.3.0"}
 
 
 @app.post(
@@ -407,7 +407,7 @@ async def api_info():
     """
     return {
         "name": "PDF2PPT API",
-        "version": "1.2.1",
+        "version": "1.3.0",
         "description": "Convert PDF Slides to PowerPoint with Vector Graphics",
         "features": [
             "Vector graphics conversion",

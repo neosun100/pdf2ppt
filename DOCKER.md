@@ -1,5 +1,13 @@
 # Docker Deployment Guide
 
+## Features
+
+- 🐳 All-in-one Docker image with pdf2svg, inkscape, and Python dependencies
+- 🌍 18 languages support (EN, CN, TW, JP, KO, FR, DE, ES, PT, IT, RU, AR, HI, TH, VI, NL, PL, TR)
+- 🎨 Modern glassmorphism Web UI
+- 📡 REST API with Swagger documentation
+- 🔧 MCP (Model Context Protocol) support
+
 ## Quick Start
 
 ```bash
