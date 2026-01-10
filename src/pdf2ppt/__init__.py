@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# Disable PIL decompression bomb check for large PDF images
+from PIL import Image
+Image.MAX_IMAGE_PIXELS = None
 
 """pdf2ppt
 
@@ -24,7 +27,7 @@ from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskPr
 from rich.panel import Panel
 from rich.table import Table
 
-__version__ = '1.2.1'
+__version__ = '1.3.1'
 TMP_DIR_NAME = '_pdf2ppt.tmp'
 ERR_INPUT_NOT_FOUND = 1
 ERR_DEPENDENCY_MISSING = 2
@@ -37,29 +40,25 @@ console = Console()
 def check_dependency(cmd: str, name: str) -> bool:
     """Check if a command-line tool is available."""
     try:
-        # pdf2svg doesn't have --version, just check if it exists
         if 'pdf2svg' in cmd:
             result = subprocess.run([cmd], capture_output=True, timeout=10)
-            return True  # pdf2svg returns non-zero but exists
+            return True
         else:
             result = subprocess.run([cmd, '--version'], capture_output=True, timeout=10)
             return True
     except FileNotFoundError:
         return False
     except subprocess.TimeoutExpired:
-        return True  # If it times out, it probably exists
+        return True
 
 
 def check_dependencies(pdf2svg_path: str, inkscape_path: str) -> bool:
     """Check all required dependencies."""
     missing = []
-    
     if not check_dependency(pdf2svg_path, 'pdf2svg'):
         missing.append(('pdf2svg', 'brew install pdf2svg', 'sudo apt install pdf2svg'))
-    
     if not check_dependency(inkscape_path, 'inkscape'):
         missing.append(('Inkscape', 'brew install inkscape', 'sudo apt install inkscape'))
-    
     if missing:
         console.print("\n[bold red]❌ Missing dependencies:[/bold red]\n")
         table = Table(show_header=True, header_style="bold magenta")
@@ -77,7 +76,6 @@ def parse_page_range(page_str: str, total_pages: int) -> list:
     """Parse page range string like '1-5,7,9-11' into list of page numbers."""
     if not page_str:
         return list(range(1, total_pages + 1))
-    
     pages = set()
     for part in page_str.split(','):
         part = part.strip()
@@ -98,11 +96,9 @@ def pdf2svg(pdf_path: Path, pdf2svg_path: str, verbose: bool = False) -> bool:
     tmp_dir = pdf_path.parent / TMP_DIR_NAME
     tmp_dir.mkdir(parents=True, exist_ok=True)
     pdf_name = pdf_path.stem
-    
     cmd = [pdf2svg_path, str(pdf_path), str(tmp_dir / f'{pdf_name}_%d.svg'), 'all']
     if verbose:
         console.print(f"[dim]Running: {' '.join(cmd)}[/dim]")
-    
     result = subprocess.run(cmd, capture_output=True)
     return result.returncode == 0
 
@@ -111,19 +107,15 @@ def convert_single_svg(args: tuple) -> tuple:
     """Convert a single SVG to EMF. Returns (page_num, success, has_filter)."""
     svg_path, emf_path, inkscape_path, no_check = args
     page_num = int(svg_path.stem.split('_')[-1])
-    
     cmd = [inkscape_path, '--export-type=emf', str(svg_path)]
     result = subprocess.run(cmd, capture_output=True)
-    
     if result.returncode != 0:
         return (page_num, False, False)
-    
     has_filter = False
     if not no_check:
         with open(svg_path, 'r', encoding='utf-8', errors='ignore') as f:
             if 'filter=' in f.read():
                 has_filter = True
-    
     return (page_num, True, has_filter)
 
 
@@ -135,24 +127,14 @@ def svg2emf(pdf_reader: PdfReader, pdf_path: Path, inkscape_path: str,
     pdf_name = pdf_path.stem
     pages_with_filters = []
     pages_with_filters_svg_dir = pdf_path.parent / f'{pdf_name}_svg'
-    
-    # Prepare conversion tasks
     tasks = []
     for page in pages:
         svg_path = tmp_dir / f'{pdf_name}_{page}.svg'
         emf_path = tmp_dir / f'{pdf_name}_{page}.emf'
         tasks.append((svg_path, emf_path, inkscape_path, no_check))
-    
-    with Progress(
-        SpinnerColumn(),
-        TextColumn("[progress.description]{task.description}"),
-        BarColumn(),
-        TaskProgressColumn(),
-        console=console,
-        transient=not verbose
-    ) as progress:
+    with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"),
+                  BarColumn(), TaskProgressColumn(), console=console, transient=not verbose) as progress:
         task = progress.add_task("[cyan]Converting SVG to EMF...", total=len(tasks))
-        
         if parallel > 1:
             with ThreadPoolExecutor(max_workers=parallel) as executor:
                 futures = {executor.submit(convert_single_svg, t): t for t in tasks}
@@ -181,7 +163,6 @@ def svg2emf(pdf_reader: PdfReader, pdf_path: Path, inkscape_path: str,
                     svg_path = tmp_dir / f'{pdf_name}_{page_num}.svg'
                     shutil.copy(svg_path, pages_with_filters_svg_dir / f'{pdf_name}_{page_num}.svg')
                 progress.advance(task)
-    
     return (True, sorted(pages_with_filters))
 
 
@@ -190,16 +171,12 @@ def emf2ppt(pdf_reader: PdfReader, pdf_path: Path, ppt_path: Path,
     """Convert EMF files to PowerPoint presentation."""
     tmp_dir = pdf_path.parent / TMP_DIR_NAME
     pdf_name = pdf_path.stem
-
     prs = Presentation()
     blank_slide_layout = prs.slide_layouts[6]
-    
     pdf_box = pdf_reader.pages[0].mediabox
     slide_width, slide_height = float(pdf_box[2]), float(pdf_box[3])
     prs.slide_width = Pt(slide_width)
     prs.slide_height = Pt(slide_height)
-
-    # Add metadata
     if pdf_reader.metadata:
         if pdf_reader.metadata.title:
             prs.core_properties.title = pdf_reader.metadata.title
@@ -209,26 +186,16 @@ def emf2ppt(pdf_reader: PdfReader, pdf_path: Path, ppt_path: Path,
             prs.core_properties.subject = pdf_reader.metadata.subject
         if pdf_reader.metadata.creation_date:
             prs.core_properties.created = pdf_reader.metadata.creation_date
-    
     prs.core_properties.comments = 'Generated using pdf2ppt (https://github.com/neosun100/pdf2ppt)'
     prs.core_properties.last_modified_by = 'pdf2ppt'
-
-    with Progress(
-        SpinnerColumn(),
-        TextColumn("[progress.description]{task.description}"),
-        BarColumn(),
-        TaskProgressColumn(),
-        console=console,
-        transient=not verbose
-    ) as progress:
+    with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"),
+                  BarColumn(), TaskProgressColumn(), console=console, transient=not verbose) as progress:
         task = progress.add_task("[cyan]Creating PowerPoint...", total=len(pages))
-        
         for page in pages:
             slide = prs.slides.add_slide(blank_slide_layout)
             emf_path = tmp_dir / f'{pdf_name}_{page}.emf'
             slide.shapes.add_picture(str(emf_path), Pt(0), Pt(0), width=prs.slide_width)
             progress.advance(task)
-    
     prs.save(ppt_path)
 
 
@@ -242,10 +209,8 @@ def clean_tmp(pdf_path: Path, verbose: bool = False):
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        prog='pdf2ppt',
-        description='Convert PDF Slides to PowerPoint Presentations with Vector Graphics'
-    )
+    parser = argparse.ArgumentParser(prog='pdf2ppt',
+        description='Convert PDF Slides to PowerPoint Presentations with Vector Graphics')
     parser.add_argument('-v', '--version', action='version', version=f'%(prog)s {__version__}')
     parser.add_argument('input', type=Path, help='Input PDF file')
     parser.add_argument('output', type=Path, nargs='?', help='Output PPTX file (default: input.pptx)')
@@ -257,74 +222,40 @@ def main():
     parser.add_argument('--parallel', '-j', type=int, default=1, help='Parallel workers (default: 1)')
     parser.add_argument('--pdf2svg-path', type=str, default='pdf2svg', help='Path to pdf2svg')
     parser.add_argument('--inkscape-path', type=str, default='inkscape', help='Path to inkscape')
-    
     args = parser.parse_args()
-    
-    # Check input file
     if not args.input.exists():
         console.print(f"[bold red]❌ Error:[/bold red] Input file not found: {args.input}")
         sys.exit(ERR_INPUT_NOT_FOUND)
-    
-    # Check dependencies
     if not check_dependencies(args.pdf2svg_path, args.inkscape_path):
         sys.exit(ERR_DEPENDENCY_MISSING)
-    
-    # Determine output path
     ppt_path = args.output if args.output else args.input.with_suffix('.pptx')
-    
-    # Check output file
     if ppt_path.exists() and not args.force:
         console.print(f"[bold yellow]⚠️  Output file exists:[/bold yellow] {ppt_path}")
         console.print("Use [cyan]--force[/cyan] to overwrite.")
         sys.exit(1)
-    
-    # Show header
-    console.print(Panel.fit(
-        f"[bold blue]pdf2ppt[/bold blue] v{__version__}\n"
-        f"[dim]Converting:[/dim] {args.input.name} → {ppt_path.name}",
-        border_style="blue"
-    ))
-    
-    # Read PDF
+    console.print(Panel.fit(f"[bold blue]pdf2ppt[/bold blue] v{__version__}\n"
+        f"[dim]Converting:[/dim] {args.input.name} → {ppt_path.name}", border_style="blue"))
     pdf_reader = PdfReader(args.input)
     total_pages = len(pdf_reader.pages)
-    
-    # Parse page range
     pages = parse_page_range(args.pages, total_pages)
     if args.verbose:
         console.print(f"[dim]Processing {len(pages)} of {total_pages} pages[/dim]")
-    
-    # Step 1: PDF to SVG
     with console.status("[bold green]Converting PDF to SVG..."):
         if not pdf2svg(args.input, args.pdf2svg_path, args.verbose):
             console.print("[bold red]❌ Error:[/bold red] Failed to convert PDF to SVG")
             sys.exit(ERR_PDF2SVG)
-    
-    # Step 2: SVG to EMF
-    success, pages_with_filters = svg2emf(
-        pdf_reader, args.input, args.inkscape_path,
-        pages, args.verbose, args.no_check, args.parallel
-    )
-    
+    success, pages_with_filters = svg2emf(pdf_reader, args.input, args.inkscape_path,
+        pages, args.verbose, args.no_check, args.parallel)
     if not success:
         console.print("[bold red]❌ Error:[/bold red] Failed to convert SVG to EMF")
         sys.exit(ERR_SVG2EMF)
-    
     if pages_with_filters:
         console.print(f"[bold yellow]⚠️  Warning:[/bold yellow] Pages {pages_with_filters} may have transparency issues.")
         console.print("[dim]   See: https://github.com/neosun100/pdf2ppt/issues/1[/dim]")
-    
-    # Step 3: EMF to PPT
     emf2ppt(pdf_reader, args.input, ppt_path, pages, args.verbose)
-    
-    # Cleanup
     if not args.no_clean:
         clean_tmp(args.input, args.verbose)
-    
-    # Success message
     console.print(f"\n[bold green]✅ Success![/bold green] Created: [cyan]{ppt_path}[/cyan]")
-    
-    # Show summary
     table = Table(show_header=False, box=None)
     table.add_row("Pages converted:", f"[cyan]{len(pages)}[/cyan]")
     table.add_row("Output file:", f"[cyan]{ppt_path}[/cyan]")
